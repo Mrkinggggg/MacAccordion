@@ -1,0 +1,30 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+
+# --- 测试与工具缓存 ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# --- 本项目的临时产物 ---
+# 录制的角度轨迹、渲染出的 WAV、下载的曲谱图片等，一律不进版本库
+_pipeline/
+*.wav
+
+# --- macOS ---
+.DS_Store
+._*
+
+# --- 编辑器 / IDE ---
+.idea/
+.vscode/
+*.swp
+
+# --- 智能体工作区（本地记忆与技能，不随项目发布）---
+.workbuddy-ai/
