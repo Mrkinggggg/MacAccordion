@@ -38,6 +38,10 @@ class EngineConfig:
     simulate_angle_step: float = 3.0
     """模拟模式下按一次 ↑/↓ 改变的角度（度）。"""
 
+    status_to_stdout: bool = True
+    """是否在终端里刷状态栏。图形界面下设为 False——终端会被窗口盖住，
+    而且 \r 刷新会污染 stdout；界面自己读状态画。"""
+
 
 class AccordionEngine:
     """实时手风琴引擎。"""
@@ -108,6 +112,11 @@ class AccordionEngine:
         with self._state_lock:
             return self._state
 
+    @property
+    def quit_requested(self) -> bool:
+        """用户是否按过退出键。图形界面用它决定退回哪一页。"""
+        return self._quit_requested
+
     # ------------------------------------------------------------------
     # 生命周期
     # ------------------------------------------------------------------
@@ -130,9 +139,10 @@ class AccordionEngine:
         if enable_keyboard:
             self._start_keyboard()
 
-        self._status_thread = threading.Thread(
-            target=self._status_loop, name="status", daemon=True)
-        self._status_thread.start()
+        if self.ecfg.status_to_stdout:
+            self._status_thread = threading.Thread(
+                target=self._status_loop, name="status", daemon=True)
+            self._status_thread.start()
 
     def stop(self) -> None:
         self._running.clear()
@@ -425,6 +435,8 @@ def _build_parser() -> argparse.ArgumentParser:
         description="把 MacBook 的开盖角度当风箱、键盘当琴键。")
     p.add_argument("--no-keyboard", action="store_true",
                    help="不监听键盘（只看传感器与气压，用来排查）")
+    p.add_argument("--gui", action="store_true",
+                   help="打开图形界面：先选专业/盲弹模式，再开始演奏")
     p.add_argument("--seconds", type=float, default=None,
                    help="跑指定秒数后自动退出（自检用）")
     p.add_argument("--gain", type=float, default=None, help="总输出增益")
@@ -454,6 +466,15 @@ def _build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = _build_parser().parse_args(argv)
+
+    if args.gui:
+        try:
+            from .gui import main as gui_main
+        except ImportError as exc:      # 没装 PySide6
+            print(f"❌ 图形界面需要 PySide6：pip install PySide6（{exc}）",
+                  file=sys.stderr)
+            return 2
+        return gui_main([])
 
     if args.list_songs:
         print("可用的乐曲：\n")

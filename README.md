@@ -13,22 +13,43 @@
 
 ```bash
 # 1. 依赖（建议先建虚拟环境，见下方"环境"）
-pip install numpy sounddevice pynput
+pip install numpy sounddevice pynput PySide6
 
-# 2. 在项目根目录直接开弹
+# 2. 图形界面：先选模式，再开弹
+python3 -m macaccordion --gui
+
+# 3. 命令行直接开弹
 python3 -m macaccordion
 
-# 3. 只看布局不开弹
+# 4. 只看布局不开弹
 python3 -m macaccordion --print-layout
 
-# 4. 自检：用模拟角度跑一遍实时链路（会出声，约 5 秒）
+# 5. 自检：用模拟角度跑一遍实时链路（会出声，约 5 秒）
 python3 -m macaccordion --selftest
 
-# 5. 盲弹模式：字母区随便按就能出《送别》
+# 6. 盲弹模式：字母区随便按就能出《送别》
 python3 -m macaccordion --melody
 ```
 
 按 `Esc` 退出。
+
+## 图形界面
+
+```bash
+python3 -m macaccordion --gui
+```
+
+分三步：
+
+1. 启动页选专业模式或盲弹模式
+2. 选盲弹的话，再挑一首乐谱，决定走完要不要绕回开头
+3. 演奏页显示角度、气压、风向、正在响的音；盲弹时另有进度
+
+演奏页每 80 ms 读一次引擎状态，音频与键盘逻辑和命令行模式共用同一套代码。
+按 `Esc` 或点「停止并返回」回到启动页。
+
+界面用 PySide6（Qt for Python），不装也能用命令行模式。乐谱列表直接读
+`macaccordion/melody.py` 里的 `SONGS`，加一首就会出现在列表里。
 
 ## 键位
 
@@ -202,19 +223,20 @@ python scripts/render_demo.py -o _pipeline/demo.wav
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install numpy sounddevice pynput pytest
+pip install numpy sounddevice pynput PySide6 pytest
 ```
 
 - Python 3.13+
 - `numpy` 实时合成
 - `sounddevice` 音频输出（wheel 自带 PortAudio，不需要 brew）
 - `pynput` 键盘监听（需要「辅助功能」权限）
+- `PySide6` 图形界面（只跑命令行模式的话可以不装）
 - `pytest` 仅测试用
 
 跑测试：
 
 ```bash
-python -m pytest tests/ -q      # 95 项
+python -m pytest tests/ -q      # 123 项
 ```
 
 ---
@@ -229,6 +251,7 @@ macaccordion/
   keymap.py     键位 → 音高（按虚拟键码，含布局示意图）
   melody.py     简谱乐谱 + 按键推进旋律
   engine.py     实时引擎（音频回调 + 键盘监听 + 状态栏）
+  gui.py        图形界面（模式选择 / 乐谱选择 / 演奏）
   render.py     离线渲染（不依赖声卡）
 _probe/         立项时的传感器逆向探针（诊断用）
 docs/调研报告.md  调研记录：已有开源项目盘点 + 实测数据
