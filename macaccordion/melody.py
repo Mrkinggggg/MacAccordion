@@ -166,7 +166,64 @@ SONGBIE = Melody(
     ),
 )
 
-SONGS: dict[str, Melody] = {SONGBIE.name: SONGBIE}
+# 《小星星》——法语童谣 Twinkle, Twinkle, Little Star。1 = C，4/4 拍。
+# 六行完整版：一、三行重复前半，二行的后两小节自身重复一遍。
+_X1 = "1:1 1:1 5:1 5:1 | 6:1 6:1 5:2 | 4:1 4:1 3:1 3:1 | 2:1 2:1 1:2"
+_X2 = "5:1 5:1 4:1 4:1 | 3:1 3:1 2:2 | 5:1 5:1 4:1 4:1 | 3:1 3:1 2:2"
+
+XIAOXINGXING = Melody(
+    name="小星星",
+    key_root="C",
+    bpm=100,
+    phrases=(
+        Phrase("第一段", "一闪一闪亮晶晶，满天都是小星星", parse_phrase(_X1)),
+        Phrase("第二段", "挂在天上放光明，好像许多小眼睛", parse_phrase(_X2)),
+        Phrase("第三段", "一闪一闪亮晶晶，满天都是小星星", parse_phrase(_X1)),
+    ),
+)
+
+# 《两只老虎》——法国童谣 Frère Jacques 的汉语填词。1 = C，4/4 拍。
+_L1 = "1:1 2:1 3:1 1:1 | 1:1 2:1 3:1 1:1 | 3:1 4:1 5:2 | 3:1 4:1 5:2"
+_L2 = "5:1 6:1 5:1 4:1 | 3:1 1:2 0:1 | 5:1 6:1 5:1 4:1 | 3:1 1:2 0:1"
+_L3 = "2:1 5v:1 1:2 | 2:1 5v:1 1:2"
+
+LIANGZHILAOHU = Melody(
+    name="两只老虎",
+    key_root="C",
+    bpm=100,
+    phrases=(
+        Phrase("第一段", "两只老虎，两只老虎，跑得快，跑得快", parse_phrase(_L1)),
+        Phrase("第二段", "一只没有耳朵，一只没有尾巴", parse_phrase(_L2)),
+        Phrase("第三段", "真奇怪，真奇怪", parse_phrase(_L3)),
+    ),
+)
+
+# 《欢乐颂》——贝多芬第九交响曲第四乐章主题，中文填词。1 = C，4/4 拍。
+# 结构 A-A'-B-A 共 16 小节。B 段的五音小节里 3、4 两个音是半拍
+# （教学谱写作"2 3 4 3 1"，中间两音各占半拍）。
+_H1 = "3:1 3:1 4:1 5:1 | 5:1 4:1 3:1 2:1 | 1:1 1:1 2:1 3:1 | 3:1.5 2:0.5 2:2"
+_H2 = "3:1 3:1 4:1 5:1 | 5:1 4:1 3:1 2:1 | 1:1 1:1 2:1 3:1 | 2:1.5 1:0.5 1:2"
+_H3 = ("2:1 2:1 3:1 1:1 | 2:1 3:0.5 4:0.5 3:1 1:1 | "
+       "2:1 3:0.5 4:0.5 3:1 2:1 | 1:1 2:1 5v:2")
+
+HUANLESONG = Melody(
+    name="欢乐颂",
+    key_root="C",
+    bpm=120,
+    phrases=(
+        Phrase("第一段", "欢乐女神圣洁美丽，灿烂光芒照大地", parse_phrase(_H1)),
+        Phrase("第二段", "我们心中充满热情，来到你的圣殿里", parse_phrase(_H2)),
+        Phrase("第三段", "你的力量能使人们，消除一切分歧", parse_phrase(_H3)),
+        Phrase("第四段", "在你光辉照耀下面，人们团结成兄弟", parse_phrase(_H2)),
+    ),
+)
+
+SONGS: dict[str, Melody] = {
+    SONGBIE.name: SONGBIE,
+    XIAOXINGXING.name: XIAOXINGXING,
+    LIANGZHILAOHU.name: LIANGZHILAOHU,
+    HUANLESONG.name: HUANLESONG,
+}
 
 
 def get_song(name: str) -> Melody:

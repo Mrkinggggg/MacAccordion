@@ -191,7 +191,10 @@ class AccordionSynth:
 
     @property
     def active_pitches(self) -> list[int]:
-        return sorted(self._voices)
+        # dict.copy() 是单个 C 调用，不会被音频/键盘线程半路插入或删除；
+        # 直接在原字典上 sorted() 可能撞上"遍历途中字典被改"的 RuntimeError，
+        # 而状态栏线程与图形界面都在读这个属性。
+        return sorted(self._voices.copy())
 
     @property
     def n_active(self) -> int:

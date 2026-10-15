@@ -112,3 +112,26 @@ def test_布局示意图能生成():
     assert len(lines) == 5
     assert any("C4" in l for l in lines)
     assert any("E6" in l for l in lines)
+
+
+def test_黑键行错开半格且标出空位():
+    """黑键应画在白键之间的缝上，E-F、B-C 两个空位用 · 标出来。"""
+    lines = Keymap().layout_lines()
+    black, white = lines[0], lines[1]
+    assert black.count("·") == 2
+    # 黑键单元格比白键整体右移 4 字符（半格），正好落在缝上
+    assert black.index("C#5") - white.index("C5") == 4
+    assert black.index("D#5") - white.index("D5") == 4
+    # 低音区同样错开
+    low_black, low_white = lines[3], lines[4]
+    assert low_black.count("·") == 2
+    assert low_black.index("C#4") - low_white.index("C4") == 4
+
+
+def test_移调后布局图音名跟着变():
+    km = Keymap()
+    km.shift_octave(1)
+    lines = km.layout_lines()
+    assert any("C6" in l for l in lines)      # Q 行原为 C5，升八度后变成 C6
+    black, white = lines[0], lines[1]
+    assert black.index("C#6") - white.index("C6") == 4

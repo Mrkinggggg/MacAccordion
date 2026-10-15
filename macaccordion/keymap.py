@@ -146,29 +146,39 @@ class Keymap:
     # ------------------------------------------------------------------
 
     def layout_lines(self) -> list[str]:
-        """返回可直接打印的键盘布局示意图。"""
-        def row(keys: list[str], pitches: list[int]) -> str:
-            cells = []
-            for k, p in zip(keys, pitches):
-                name = _NOTE_NAMES[(p + self.octave_shift) % 12]
-                octave = (p + self.octave_shift) // 12 - 1
-                cells.append(f"{k.upper():>2} {name}{octave}")
-            return "  ".join(cells)
+        """返回可直接打印的键盘布局示意图。
 
-        def row_with_gaps(keys: list[str], pitches: list[int]) -> str:
-            cells = []
-            for k, p in zip(keys, pitches):
-                name = _NOTE_NAMES[(p + self.octave_shift) % 12]
-                octave = (p + self.octave_shift) // 12 - 1
-                cells.append(f"{k.upper():>2} {name}{octave}")
-            return "   ".join(cells)
+        黑键行相对白键行**整体右移半格**：每颗黑键画在两边白键之间的缝上；
+        E-F、B-C 之间没有黑键，这些缝用 ``·`` 标出空位，免得看着像漏排。
+        """
+        def cell(key: str, pitch: int) -> str:
+            name = _NOTE_NAMES[(pitch + self.octave_shift) % 12]
+            octave = (pitch + self.octave_shift) // 12 - 1
+            # 一律补到 5 字符：黑键名长一个 #，不补齐的话错开量会逐格漂移
+            return f"{key.upper()} {name}{octave}".ljust(5)
+
+        def white_row(keys: list[str], pitches: list[int]) -> str:
+            return "   ".join(cell(k, p) for k, p in zip(keys, pitches))
+
+        def black_row(keys: list[str], blacks: list[int],
+                      whites: list[int]) -> str:
+            cells: list[str] = []
+            bi = 0
+            for i in range(len(whites) - 1):
+                # C / D / F / G / A 后面有黑键，E / B 后面没有
+                if whites[i] % 12 in (0, 2, 5, 7, 9):
+                    cells.append(cell(keys[bi], blacks[bi]))
+                    bi += 1
+                else:
+                    cells.append("  ·  ")
+            return "    " + "   ".join(cells)
 
         lines = [
-            "高音区黑键  " + row_with_gaps(_HIGH_BLACK_KEYS, HIGH_BLACKS),
-            "高音区白键  " + row(_HIGH_WHITE_KEYS, HIGH_WHITES),
+            "高音区黑键  " + black_row(_HIGH_BLACK_KEYS, HIGH_BLACKS, HIGH_WHITES),
+            "高音区白键  " + white_row(_HIGH_WHITE_KEYS, HIGH_WHITES),
             "",
-            "低音区黑键  " + row_with_gaps(_LOW_BLACK_KEYS, LOW_BLACKS),
-            "低音区白键  " + row(_LOW_WHITE_KEYS, LOW_WHITES),
+            "低音区黑键  " + black_row(_LOW_BLACK_KEYS, LOW_BLACKS, LOW_WHITES),
+            "低音区白键  " + white_row(_LOW_WHITE_KEYS, LOW_WHITES),
         ]
         return lines
 

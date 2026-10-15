@@ -248,7 +248,6 @@ class RangeTracker:
 
     min_seen: float = 180.0
     max_seen: float = 0.0
-    decay: float = 0.0            # >0 时缓慢把极值向当前值收缩，适应姿势变化
     min_span: float = 25.0        # 小于这个跨度就认为还没张开，不做归一化
 
     def update(self, angle: float) -> None:
@@ -294,7 +293,6 @@ class SensorReader:
         self.valid: bool = False
         self.invalid_frames: int = 0
         self.read_count: int = 0
-        self.range_tracker = RangeTracker()
 
     # -- 生命周期 ---------------------------------------------------------
 
@@ -335,7 +333,6 @@ class SensorReader:
                 self.latest_time = now
                 self.valid = True
                 self.read_count += 1
-                self.range_tracker.update(float(angle))
 
             next_t += period
             sleep = next_t - time.monotonic()
@@ -345,11 +342,6 @@ class SensorReader:
                 next_t = time.monotonic()   # 落后了就重新对齐，避免追赶式空转
 
     # -- 便捷访问 ---------------------------------------------------------
-
-    @property
-    def position(self) -> float:
-        """归一化开合位置 0..1。"""
-        return self.range_tracker.normalize(self.latest_angle)
 
     def set_simulated(self, angle: float) -> None:
         """模拟模式下直接设定角度（供键盘 ↑↓ 试玩用）。"""
